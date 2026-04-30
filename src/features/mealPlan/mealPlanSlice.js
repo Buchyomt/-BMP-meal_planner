@@ -72,7 +72,7 @@ const mealPool = {
       meal: 'Oatmeal & Fruits',
       price: 600,
       tags: ['Vitamins', 'Carbs'],
-      image: 'https://images.unsplash.com/photo-1517673132405-a56a62b18caf?q=80&w=400&auto=format&fit=crop',
+      image: '/assets/meals/Oatmeal and fruits.jpg',
       description: 'Healthy oats with seasonal fruit toppings',
       time: '7:00 AM',
       calories: 320,
