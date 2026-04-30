@@ -8,9 +8,9 @@ const loadPantry = () => {
 };
 
 const defaultItems = [
-  { id: '1', name: 'Rice',     quantity: 5, unit: 'kg',   image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=200&auto=format&fit=crop' },
-  { id: '2', name: 'Beans',   quantity: 2, unit: 'kg',   image: 'https://images.unsplash.com/photo-1551754655-cd27e38d2076?w=200&auto=format&fit=crop' },
-  { id: '3', name: 'Palm Oil',quantity: 1, unit: 'L',    image: 'https://images.unsplash.com/photo-1620574387735-3624d75b2dbc?w=200&auto=format&fit=crop' },
+  { id: '1', name: 'Rice',     quantity: 5, unit: 'kg',   image: '/assets/pantry/rice.jpg' },
+  { id: '2', name: 'Beans',   quantity: 2, unit: 'kg',   image: '/assets/pantry/beans.jpg' },
+  { id: '3', name: 'Palm Oil',quantity: 1, unit: 'L',    image: '/assets/pantry/palmoil.jpg' },
   { id: '4', name: 'Salt',    quantity: 1, unit: 'pack', image: 'https://images.unsplash.com/photo-1518110925495-5fe2fda0442c?w=200&auto=format&fit=crop' },
 ];
 
