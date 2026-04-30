@@ -1,0 +1,442 @@
+.pantry-page {
+  animation: fadeIn 0.5s ease-out;
+  padding: 1.5rem;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+}
+
+.header-text h1 {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--primary-dark);
+  margin-bottom: 5px;
+}
+
+.header-text p {
+  color: var(--text-secondary);
+}
+
+.add-pantry-btn {
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.add-item-form {
+  margin-bottom: 2rem;
+  padding: 2rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  align-items: flex-end;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.form-group input, .form-group select {
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  background: white;
+}
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.save-btn {
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cancel-btn {
+  background: #f1f5f9;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pantry-controls {
+  margin-bottom: 2rem;
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: white;
+  padding: 10px 15px;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  max-width: 400px;
+}
+
+.search-bar input {
+  border: none;
+  outline: none;
+  width: 100%;
+}
+
+.pantry-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.5rem;
+}
+
+.pantry-card {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 16px;
+}
+
+/* Image wrapper at the top of each card */
+.pantry-img-wrapper {
+  position: relative;
+  width: 100%;
+  height: 140px;
+  background: #F1F5F9;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.pantry-item-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.pantry-item-emoji {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  background: linear-gradient(135deg, #F8FAFC, #EFF6FF);
+}
+
+/* Edit image button overlay */
+.edit-img-btn {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  transition: all 0.2s;
+  color: #64748B;
+}
+
+.edit-img-btn:hover {
+  background: white;
+  transform: scale(1.1);
+  color: #00A651;
+}
+
+/* Low stock badge inside image area */
+.pantry-low-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: #FEF3C7;
+  color: #B45309;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid #FDE68A;
+}
+
+/* Card body below image */
+.pantry-card-body {
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.item-icon {
+  background: var(--primary-light);
+  color: var(--primary-color);
+  padding: 8px;
+  border-radius: 10px;
+}
+
+.delete-btn {
+  background: transparent;
+  border: none;
+  color: #ef4444;
+  cursor: pointer;
+  opacity: 0.5;
+  transition: opacity 0.2s;
+}
+
+.delete-btn:hover { opacity: 1; }
+
+.pantry-card h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.quantity-control {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f8fafc;
+  padding: 10px;
+  border-radius: 12px;
+}
+
+.quantity-control button {
+  background: white;
+  border: 1px solid var(--border-color);
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.quantity-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.quantity-display strong { font-size: 1.2rem; }
+.quantity-display span { font-size: 0.75rem; color: var(--text-secondary); }
+
+.low-stock-badge {
+  background: #fee2e2;
+  color: #b91c1c;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 100px;
+  align-self: flex-start;
+}
+
+/* ── Form row layout ─────────────────────────── */
+.add-item-form {
+  margin-bottom: 2rem;
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 1rem;
+}
+
+/* ── Low-stock card highlight ────────────────── */
+.pantry-card.low-stock {
+  border: 1.5px solid #fca5a5;
+  background: linear-gradient(135deg, #fff, #fff5f5);
+}
+
+.item-icon.icon-warning {
+  background: #fee2e2;
+  color: #b91c1c;
+  padding: 8px;
+  border-radius: 10px;
+}
+
+.item-icon.icon-ok {
+  background: var(--primary-light);
+  color: var(--primary-color);
+  padding: 8px;
+  border-radius: 10px;
+}
+
+/* ── Just-added flash ────────────────────────── */
+@keyframes flashAdded {
+  0%   { box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.5); }
+  100% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0); }
+}
+
+.pantry-card.just-added {
+  animation: flashAdded 1.8s ease-out;
+}
+
+.added-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #16a34a;
+}
+
+/* ── Controls row ────────────────────────────── */
+.pantry-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.item-count {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* ── Low-stock banner in header ──────────────── */
+.low-stock-banner {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #fff7ed;
+  color: #c2410c;
+  border: 1px solid #fdba74;
+  padding: 8px 14px;
+  border-radius: 100px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+/* ── Empty state ─────────────────────────────── */
+.empty-pantry {
+  text-align: center;
+  padding: 5rem 2rem;
+  color: var(--text-secondary);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.save-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ── Responsive ──────────────────────────────── */
+@media (max-width: 768px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  .add-pantry-btn {
+    width: 100%;
+    justify-content: center;
+  }
+  .pantry-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .search-bar {
+    max-width: 100%;
+  }
+  .header-text h1 {
+    font-size: 1.5rem;
+  }
+  .pantry-grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 1rem;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Image upload field in Add Item form */
+.image-upload-group {
+  margin-top: 0.5rem;
+}
+
+.image-upload-area {
+  width: 100%;
+  height: 130px;
+  border: 2px dashed #CBD5E1;
+  border-radius: 12px;
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color 0.2s, background 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #F8FAFC;
+}
+
+.image-upload-area:hover {
+  border-color: #00A651;
+  background: #F0FDF4;
+}
+
+.image-upload-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  color: #94A3B8;
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.image-upload-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+

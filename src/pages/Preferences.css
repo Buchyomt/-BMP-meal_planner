@@ -1,0 +1,679 @@
+.preferences-wizard {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.wizard-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.back-btn {
+  position: absolute;
+  left: 2rem;
+  top: 1.5rem;
+  background: white;
+  border: 1px solid #E5E7EB;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #6B7280;
+  transition: all 0.2s;
+}
+
+.back-btn:hover {
+  background: #F9FAFB;
+  color: #111827;
+}
+
+.step-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.step-text {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #9CA3AF;
+  letter-spacing: 0.05em;
+}
+
+.step-dots {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.dot {
+  width: 24px;
+  height: 4px;
+  border-radius: 2px;
+  background: #E5E7EB;
+}
+
+.dot.active {
+  background: var(--secondary-color, #00A651);
+}
+
+.wizard-title-section {
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+.wizard-title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #111827;
+  margin: 0;
+}
+
+.wizard-subtitle {
+  font-size: 0.9375rem;
+  color: #6B7280;
+  margin: 0.5rem 0 0 0;
+}
+
+/* Main Setup Card */
+.setup-card {
+  background: white;
+  border-radius: 24px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  border: 1px solid #F3F4F6;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.section-label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 1.25rem;
+}
+
+.section-label svg {
+  color: var(--secondary-color, #00A651);
+}
+
+/* Diet Type Grid */
+.diet-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+}
+
+.diet-card {
+  background: white;
+  border: 1px solid #F3F4F6;
+  border-radius: 16px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.diet-card:hover {
+  border-color: #D1FAE5;
+  transform: translateY(-2px);
+}
+
+.diet-card.selected {
+  background: #F0FDF4;
+  border-color: #22C55E;
+  box-shadow: 0 0 0 1px #22C55E;
+}
+
+.check-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #22C55E;
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.diet-icon-box {
+  font-size: 1.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.diet-card-name {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+}
+
+.diet-card-desc {
+  font-size: 0.75rem;
+  color: #6B7280;
+  margin: 0;
+}
+
+/* Allergies Section */
+.allergies-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.allergy-pill {
+  padding: 0.5rem 1rem;
+  background: white;
+  border: 1px solid #F3F4F6;
+  border-radius: 9999px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #4B5563;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.allergy-pill:hover {
+  border-color: #D1FAE5;
+}
+
+.allergy-pill.selected {
+  background: #22C55E;
+  color: white;
+  border-color: #22C55E;
+}
+
+/* Household & Duration */
+.bottom-settings {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  margin-top: 1rem;
+}
+
+.counter-control {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  background: #F9FAFB;
+  padding: 0.5rem;
+  border-radius: 12px;
+  width: fit-content;
+}
+
+.counter-btn {
+  background: white;
+  border: 1px solid #E5E7EB;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #111827;
+  transition: all 0.2s;
+}
+
+.counter-btn:hover {
+  background: #F3F4F6;
+}
+
+.counter-value {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.count-num {
+  font-size: 1.125rem;
+  font-weight: 800;
+  color: #111827;
+}
+
+.count-label {
+  font-size: 0.7rem;
+  color: #6B7280;
+}
+
+/* Duration Toggler */
+.duration-toggle {
+  display: flex;
+  background: #F3F4F6;
+  padding: 3px;
+  border-radius: 10px;
+  width: fit-content;
+}
+
+.toggle-opt {
+  padding: 0.5rem 1.25rem;
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #6B7280;
+}
+
+.toggle-opt.active {
+  background: #22C55E;
+  color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Wizard Footer */
+.wizard-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+}
+
+.security-notice {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: #9CA3AF;
+  font-weight: 500;
+}
+
+.btn-next {
+  background: var(--secondary-color, #00A651);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 0.75rem 1.5rem;
+  font-weight: 700;
+  font-size: 0.9375rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 10px rgba(0, 166, 81, 0.2);
+}
+
+.btn-next:hover {
+  background: var(--primary-dark, #007A33);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 15px rgba(0, 166, 81, 0.3);
+}
+
+@media (max-width: 768px) {
+  .diet-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .bottom-settings {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  .back-btn {
+    left: 1rem;
+    top: 1rem;
+  }
+}
+
+/* Settings View Styles */
+.preferences-settings {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 1rem 2rem 5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.settings-header {
+  margin-bottom: 2.5rem;
+}
+
+.settings-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+}
+
+.settings-subtitle {
+  font-size: 0.8125rem;
+  color: #6B7280;
+  margin: 0.25rem 0 0 0;
+}
+
+.settings-card {
+  background: white;
+  border-radius: 16px;
+  padding: 1.25rem 1.75rem;
+  border: 1px solid #F3F4F6;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.card-label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: #374151;
+}
+
+.card-label svg {
+  color: #10B981;
+}
+
+.card-desc {
+  font-size: 0.75rem;
+  color: #9CA3AF;
+  margin: -0.5rem 0 0.5rem 1.75rem;
+}
+
+/* Weekly Budget Slider */
+.budget-display {
+  text-align: center;
+  margin: 1rem 0;
+}
+
+.budget-amount-large {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #10B981;
+  letter-spacing: -0.025em;
+}
+
+.slider-container {
+  padding: 1rem 0;
+}
+
+.budget-slider {
+  width: 100%;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  background: #E5E7EB;
+  border-radius: 3px;
+  outline: none;
+}
+
+.budget-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #10B981;
+  cursor: pointer;
+  border: 4px solid white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.slider-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.75rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #9CA3AF;
+}
+
+.exact-amount-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #4B5563;
+}
+
+.exact-input {
+  background: #F9FAFB;
+  border: 1px solid #E5E7EB;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  width: 120px;
+  outline: none;
+  color: #111827;
+}
+
+/* Dietary Toggle List */
+.diet-toggle-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.diet-toggle-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #F3F4F6;
+}
+
+.diet-toggle-item:last-child {
+  border-bottom: none;
+}
+
+.diet-item-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.diet-item-icon {
+  font-size: 1.125rem;
+  min-width: 24px;
+}
+
+.diet-item-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.diet-item-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1F2937;
+}
+
+.diet-item-desc {
+  font-size: 0.7rem;
+  color: #9CA3AF;
+}
+
+/* Switch Styles */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 22px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider-round {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #E5E7EB;
+  transition: .3s;
+  border-radius: 22px;
+}
+
+.slider-round:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  transition: .3s;
+  border-radius: 50%;
+}
+
+input:checked + .slider-round {
+  background-color: #10B981;
+}
+
+input:checked + .slider-round:before {
+  transform: translateX(18px);
+}
+
+/* Closable Pill Styles */
+.closable-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.875rem;
+  background: #10B981;
+  color: white;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.pill-close {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+}
+
+.pill-close:hover {
+  opacity: 1;
+}
+
+.save-action {
+  position: fixed;
+  bottom: 2.5rem;
+  right: 2.5rem;
+  z-index: 100;
+}
+
+.btn-save {
+  background: #10B981;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 0.75rem 1.5rem;
+  font-weight: 700;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  transition: all 0.2s;
+}
+
+.btn-save:hover {
+  background: #059669;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+}
+
+/* Success Toast */
+.success-toast {
+  position: fixed;
+  top: 2rem;
+  right: 2rem;
+  background: #065F46;
+  color: white;
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  z-index: 200;
+  animation: slideInRight 0.3s ease-out;
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@media (max-width: 640px) {
+  .preferences-settings {
+    padding: 1rem 1rem 6rem 1rem;
+  }
+  .save-action {
+    right: 1.5rem;
+    bottom: 1.5rem;
+  }
+  .diet-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+  .wizard-title {
+    font-size: 1.25rem;
+  }
+  .wizard-subtitle {
+    font-size: 0.8125rem;
+  }
+  .bottom-settings {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  .btn-next {
+    width: 100%;
+    justify-content: center;
+  }
+  .wizard-footer {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+  .security-notice {
+    justify-content: center;
+  }
+  .setup-card {
+    padding: 1.25rem;
+  }
+  .preferences-wizard {
+    padding: 1rem;
+  }
+}
+

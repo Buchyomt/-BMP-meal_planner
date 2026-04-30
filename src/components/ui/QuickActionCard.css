@@ -1,0 +1,58 @@
+.quick-action-card {
+  background-color: white;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  cursor: pointer;
+  border: 1px solid var(--border-color);
+  transition: all 0.2s ease;
+  box-shadow: var(--card-shadow);
+}
+
+.quick-action-card:hover {
+  border-color: var(--primary-color);
+  background-color: #F9FAFB;
+}
+
+.action-icon-box {
+  width: 42px;
+  height: 42px;
+  background-color: #F3F4F6;
+  color: var(--primary-color);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.quick-action-card:hover .action-icon-box {
+  background-color: #D1FAE5;
+}
+
+.action-text {
+  flex: 1;
+}
+
+.action-title {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.1rem;
+}
+
+.action-subtitle {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+}
+
+.action-arrow {
+  color: #9CA3AF;
+  transition: transform 0.2s;
+}
+
+.quick-action-card:hover .action-arrow {
+  transform: translateX(4px);
+  color: var(--primary-color);
+}

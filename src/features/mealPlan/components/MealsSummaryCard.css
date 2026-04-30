@@ -1,0 +1,90 @@
+.meals-summary {
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.meals-summary:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+}
+
+.summary-main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-top: 1rem;
+  margin-bottom: 2rem;
+}
+
+.summary-icon-box {
+  background-color: #FFFBEB;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 0.75rem;
+}
+
+.meals-count {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.meals-subtitle {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.meals-breakdown {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 1.5rem;
+  border-top: 1px solid #F3F4F6;
+  padding-top: 1.5rem;
+}
+
+.breakdown-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.breakdown-count {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.breakdown-label {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  text-transform: capitalize;
+}
+
+.planning-progress {
+  margin-top: auto;
+}
+
+.planning-progress .progress-bar-bg {
+  height: 6px;
+  background-color: #F3F4F6;
+  border-radius: 3px;
+  margin-bottom: 0.5rem;
+}
+
+.planning-progress .progress-bar-fill {
+  background-color: #10B981;
+  height: 100%;
+  border-radius: 3px;
+}
+
+.planning-progress .progress-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-align: right;
+}

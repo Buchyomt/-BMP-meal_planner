@@ -1,0 +1,56 @@
+.savings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.time-badge {
+  background-color: #F3F4F6;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.savings-summary {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  margin-top: 1rem;
+}
+
+.savings-icon-box {
+  background-color: #FEF9C3;
+  padding: 0.75rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.savings-amount {
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin-bottom: 0.1rem;
+}
+
+.savings-subtitle {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.25rem;
+}
+
+.savings-trend {
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.text-yellow {
+  color: #EAB308;
+}
+
+.chart-wrapper {
+  margin-top: 1rem;
+}
