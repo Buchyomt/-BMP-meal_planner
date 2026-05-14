@@ -84,11 +84,7 @@ const Profile = () => {
         formPayload.append('profileImage', selectedFile);
       }
 
-      const response = await api.put('/user/profile', formPayload, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
+      const response = await api.put('/user/profile', formPayload);
 
       const updatedUser = response.data;
       // Important: Merge the new data with existing data in case some fields are missing in response
