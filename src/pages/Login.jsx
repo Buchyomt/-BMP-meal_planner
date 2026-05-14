@@ -35,11 +35,10 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await api.post('/auth/verify-otp', { email, code: otpCode });
-      const { token, name, email: userEmail, role } = response.data;
+      const { token, ...userData } = response.data;
       localStorage.setItem('bmp_token', token);
       localStorage.setItem('bmp_isLoggedIn', 'true');
-      localStorage.setItem('bmp_currentUser', JSON.stringify({ name, email: userEmail, role }));
+      localStorage.setItem('bmp_currentUser', JSON.stringify(userData));
       window.location.href = '/dashboard';
     } catch (err) {
       setError(err.response?.data?.message || 'Invalid or expired OTP.');
@@ -54,10 +53,10 @@ const Login = () => {
       const response = await api.post('/auth/google', {
         token: credentialResponse.credential
       });
-      const { token, name, email: userEmail, role } = response.data;
+      const { token, ...userData } = response.data;
       localStorage.setItem('bmp_token', token);
       localStorage.setItem('bmp_isLoggedIn', 'true');
-      localStorage.setItem('bmp_currentUser', JSON.stringify({ name, email: userEmail, role }));
+      localStorage.setItem('bmp_currentUser', JSON.stringify(userData));
       window.location.href = '/dashboard';
     } catch (err) {
       setError(err.response?.data?.message || 'Google Sign-In failed.');
@@ -78,12 +77,10 @@ const Login = () => {
     setLoading(true);
     try {
       const response = await api.post('/auth/login', { email, password });
-      const { token, name, email: userEmail, role } = response.data;
-
-      // Store auth data
+      const { token, ...userData } = response.data;
       localStorage.setItem('bmp_token', token);
       localStorage.setItem('bmp_isLoggedIn', 'true');
-      localStorage.setItem('bmp_currentUser', JSON.stringify({ name, email: userEmail, role }));
+      localStorage.setItem('bmp_currentUser', JSON.stringify(userData));
 
       // Redirect to dashboard
       window.location.href = '/dashboard';
