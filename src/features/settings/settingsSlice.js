@@ -1,5 +1,8 @@
-import { createSlice } from '@reduxjs/toolkit';
-import { loadScopedData } from '../../utils/storageUtils';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { fetchPreferences } from '../preferences/preferencesSlice';
+
+// Note: Settings are now synchronized via the fetchPreferences thunk in preferencesSlice.
+// This slice handles the local UI state for these settings.
 
 const defaultInitialState = {
   theme: 'light', 
@@ -20,11 +23,7 @@ const defaultInitialState = {
   region: 'Nigeria'
 };
 
-const loadSettings = () => {
-  return loadScopedData('settings_v1');
-};
-
-const initialState = loadSettings() || defaultInitialState;
+const initialState = defaultInitialState;
 
 const settingsSlice = createSlice({
   name: 'settings',
@@ -47,6 +46,15 @@ const settingsSlice = createSlice({
     },
     resetSettings: () => initialState,
   },
+  extraReducers: (builder) => {
+    builder.addCase(fetchPreferences.fulfilled, (state, action) => {
+      const { theme, accentColor, currency, notifications } = action.payload;
+      if (theme) state.theme = theme;
+      if (accentColor) state.accentColor = accentColor;
+      if (currency) state.currency = currency;
+      if (notifications) state.notifications = { ...state.notifications, ...notifications };
+    });
+  }
 });
 
 export const { 

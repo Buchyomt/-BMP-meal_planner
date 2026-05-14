@@ -12,6 +12,7 @@ import Market from '../pages/Market';
 import Login from '../pages/Login';
 import Signup from '../pages/Signup';
 import Settings from '../pages/Settings';
+import AdminView from '../pages/AdminView';
 import ProtectedRoute from '../pages/ProtectedRoute';
 
 import LandingPage from '../pages/LandingPage';
@@ -36,6 +37,7 @@ const App = () => {
             <Route path="/preferences" element={<Navigate to="/settings" replace />} />
             <Route path="/profile" element={<Navigate to="/settings" replace />} />
             <Route path="/search" element={<Search />} />
+            <Route path="/admin" element={<AdminView />} />
           </Route>
         </Route>
 

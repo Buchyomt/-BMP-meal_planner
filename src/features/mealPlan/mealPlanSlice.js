@@ -1,5 +1,48 @@
-import { createSlice } from '@reduxjs/toolkit';
-import { loadScopedData } from '../../utils/storageUtils';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import api from '../../services/api';
+
+// ─── Async Thunks for API calls ──────────────────────────────────────────────
+
+export const fetchMealPlans = createAsyncThunk(
+  'mealPlan/fetchMealPlans',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await api.get('/meals');
+      return response.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message || 'Failed to fetch meals');
+    }
+  }
+);
+
+// We'll use a single "saveWholePlan" thunk that syncs the weekPlan to the DB
+export const syncMealPlan = createAsyncThunk(
+  'mealPlan/syncMealPlan',
+  async (weekPlan, { rejectWithValue }) => {
+    try {
+      // For each meal in the weekPlan, we want to ensure it's in the DB.
+      // This is a simplified sync logic: for now, we'll just send the whole thing 
+      // or implement individual updates. Let's stick to individual updates in the swapMeal reducer for now.
+      // For this thunk, we'll just mock a success if we're doing batch.
+      // Actually, let's skip a batch sync for now and just handle individual saves.
+      return weekPlan;
+    } catch (err) {
+      return rejectWithValue('Sync failed');
+    }
+  }
+);
+
+export const searchRecipes = createAsyncThunk(
+  'mealPlan/searchRecipes',
+  async (query, { rejectWithValue }) => {
+    try {
+      const response = await api.get(`/recipes/search?query=${query}`);
+      return response.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message || 'Search failed');
+    }
+  }
+);
 
 const allergyIngredientMap = {
   Groundnut: ['Raw groundnuts'],
@@ -344,7 +387,6 @@ const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const createDefaultWeekPlan = () => {
   return DAYS.reduce((plan, day, i) => {
     plan[day] = {
-      // Rotate across the pools so each day gets a different meal
       breakfast: mealPool.breakfast[i % mealPool.breakfast.length],
       lunch:     mealPool.lunch[i % mealPool.lunch.length],
       dinner:    mealPool.dinner[i % mealPool.dinner.length],
@@ -354,40 +396,22 @@ const createDefaultWeekPlan = () => {
   }, {});
 };
 
-
-// ─── Load persisted meal plan from localStorage on startup ───────────────────
-const loadMealPlan = () => {
-  return loadScopedData('mealPlan_v1');
-};
-
 const defaultInitialState = {
-  meals: [
-    { day: 'Mon', meal: 'Jollof Rice & Chicken', price: 2800, tags: ['Protein', 'Carbs'], image: '/assets/meals/jollof_rice_chicken.png', calories: 620, protein: 35, carbs: 80 },
-    { day: 'Tue', meal: 'Beans & Plantain', price: 1500, tags: ['Protein', 'Vitamins'], image: '/assets/meals/beans_plantain.png', calories: 540, protein: 22, carbs: 75 },
-    { day: 'Wed', meal: 'Egusi Soup & Pounded Yam', price: 2200, tags: ['Protein', 'Carbs'], image: '/assets/meals/egusi_pounded_yam.png', calories: 710, protein: 32, carbs: 90 },
-    { day: 'Thu', meal: 'Akara & Pap', price: 1200, tags: ['Protein', 'Carbs'], image: '/assets/meals/akara_pap.png', calories: 420, protein: 18, carbs: 55 },
-    { day: 'Fri', meal: 'Yam & Egg Sauce', price: 1800, tags: ['Vitamins', 'Carbs'], image: '/assets/meals/yam_egg_sauce.png', calories: 460, protein: 15, carbs: 70 },
-    { day: 'Sat', meal: 'Fried Rice & Coleslaw', price: 3000, tags: ['Protein', 'Carbs'], image: 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?q=80&w=400&auto=format&fit=crop', calories: 580, protein: 28, carbs: 78 },
-    { day: 'Sun', meal: 'Vegetable Soup & Eba', price: 2050, tags: ['Vitamins', 'Protein'], image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=200&auto=format&fit=crop', calories: 640, protein: 28, carbs: 82 },
-  ],
+  meals: [],
   weekPlan: createDefaultWeekPlan(),
   summary: {
     totalMeals: 21,
     breakdown: { breakfast: 7, lunch: 7, dinner: 7 },
   },
   totalBudget: 15000,
+  loading: false,
+  error: null
 };
-
-const initialState = loadMealPlan() || defaultInitialState;
 
 const mealPlanSlice = createSlice({
   name: 'mealPlan',
-  initialState,
+  initialState: defaultInitialState,
   reducers: {
-    rehydrate: (state, action) => {
-      const persisted = loadMealPlan();
-      return persisted ? { ...state, ...persisted } : defaultInitialState;
-    },
     setMeals: (state, action) => {
       state.meals = action.payload;
     },
@@ -400,14 +424,13 @@ const mealPlanSlice = createSlice({
 
       const filterByGoalAndAllergies = (pool, goal) => {
         let filtered = pool.filter(meal => !meal.ingredients.some(ing => excludedIngredients.includes(ing)));
-        if (filtered.length === 0) filtered = pool; // Fallback if allergies exclude everything
+        if (filtered.length === 0) filtered = pool; 
 
         if (goal === 'Weight Loss') return filtered.filter(m => m.calories < 450 || m.tags.includes('Vitamins'));
         if (goal === 'Muscle Gain') return filtered.filter(m => m.protein > 25 || m.calories > 500);
         return filtered;
       };
 
-      // Fisher-Yates shuffle for true randomisation without in-place repeats
       const shuffle = (arr) => {
         const a = [...arr];
         for (let i = a.length - 1; i > 0; i--) {
@@ -417,11 +440,9 @@ const mealPlanSlice = createSlice({
         return a;
       };
 
-      // Build unique-first queues per meal type, padded with as many shuffles as needed to cover all 7 days
       const buildQueue = (pool, goal) => {
         const filtered = filterByGoalAndAllergies(pool, goal);
         let base = shuffle(filtered);
-        // Ensure we have at least 7 items by repeating the shuffled list if needed
         while (base.length < DAYS.length && filtered.length > 0) {
           base = [...base, ...shuffle(filtered)];
         }
@@ -442,7 +463,6 @@ const mealPlanSlice = createSlice({
         };
       });
       
-      // Update Dashboard meals array to show 7 unique meals drawn from the week's plan
       const uniqueDashboardMeals = [];
       const seenMeals = new Set();
       
@@ -463,7 +483,6 @@ const mealPlanSlice = createSlice({
       });
       
       state.meals = uniqueDashboardMeals;
-      
       state.summary = { totalMeals: 28, breakdown: { breakfast: 7, lunch: 7, dinner: 7, snack: 7 } };
       state.totalBudget = Object.values(state.weekPlan).reduce((acc, d) => {
         return acc + (d.breakfast?.price || 0) + (d.lunch?.price || 0) + (d.dinner?.price || 0) + (d.snack?.price || 0);
@@ -480,7 +499,7 @@ const mealPlanSlice = createSlice({
 
       const filterByGoalAndAllergies = (pool, goal) => {
         let filtered = pool.filter(meal => !meal.ingredients.some(ing => excludedIngredients.includes(ing)));
-        if (filtered.length === 0) filtered = pool; // Fallback
+        if (filtered.length === 0) filtered = pool; 
 
         if (goal === 'Weight Loss') return filtered.filter(m => m.calories < 450 || m.tags.includes('Vitamins'));
         if (goal === 'Muscle Gain') return filtered.filter(m => m.protein > 25 || m.calories > 500);
@@ -496,7 +515,6 @@ const mealPlanSlice = createSlice({
         state.weekPlan[day][mealType] = next;
       }
       
-      // Recalculate total budget
       state.totalBudget = Object.values(state.weekPlan).reduce((acc, d) => {
         return acc + (d.breakfast?.price || 0) + (d.lunch?.price || 0) + (d.dinner?.price || 0) + (d.snack?.price || 0);
       }, 0);
@@ -507,13 +525,24 @@ const mealPlanSlice = createSlice({
         state.weekPlan[day][mealType] = newMeal;
       }
     },
-    consumeIngredients: (state, action) => {
-      const { ingredients } = action.payload;
-      // Logic to decrement pantry items would go here
-    },
   },
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchMealPlans.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(fetchMealPlans.fulfilled, (state, action) => {
+        state.loading = false;
+        // Ensure action.payload is an array before setting it to meals
+        state.meals = Array.isArray(action.payload) ? action.payload : [];
+      })
+      .addCase(fetchMealPlans.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      });
+  }
 });
 
-export const { setMeals, generateRandomPlan, swapMeal, updateMealInPlan, consumeIngredients } = mealPlanSlice.actions;
+export const { setMeals, generateRandomPlan, swapMeal, updateMealInPlan } = mealPlanSlice.actions;
 export { mealPool };
 export default mealPlanSlice.reducer;

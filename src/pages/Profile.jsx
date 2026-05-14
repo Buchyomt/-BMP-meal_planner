@@ -7,6 +7,7 @@ import {
   ChevronRight, Star, TrendingUp, Calendar, Heart,
   X, Check, Save, Camera, Upload
 } from 'lucide-react';
+import api from '../services/api';
 import './Profile.css';
 
 const Profile = () => {
@@ -51,6 +52,8 @@ const Profile = () => {
     }
   }, []);
 
+  const [selectedFile, setSelectedFile] = useState(null);
+
   const showSuccess = (msg) => {
     setToast(msg);
     setTimeout(() => setToast(null), 3000);
@@ -59,6 +62,7 @@ const Profile = () => {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      setSelectedFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setFormData(prev => ({ ...prev, image: reader.result }));
@@ -67,12 +71,34 @@ const Profile = () => {
     }
   };
 
-  const handleEditSubmit = (e) => {
+  const handleEditSubmit = async (e) => {
     e.preventDefault();
-    localStorage.setItem('bmp_currentUser', JSON.stringify(formData));
-    setUser(formData);
-    setIsEditModalOpen(false);
-    showSuccess('Profile updated successfully!');
+    try {
+      const formPayload = new FormData();
+      formPayload.append('name', formData.name);
+      formPayload.append('email', formData.email);
+      formPayload.append('phone', formData.phone || '');
+      formPayload.append('location', formData.location || '');
+      
+      if (selectedFile) {
+        formPayload.append('profileImage', selectedFile);
+      }
+
+      const response = await api.put('/user/profile', formPayload, {
+        headers: {
+          'Content-Type': undefined
+        }
+      });
+
+      
+      const updatedUser = response.data;
+      localStorage.setItem('bmp_currentUser', JSON.stringify(updatedUser));
+      setUser(prev => ({ ...prev, ...updatedUser }));
+      setIsEditModalOpen(false);
+      showSuccess('Profile updated successfully!');
+    } catch (error) {
+      setToast(error.response?.data?.message || 'Failed to update profile');
+    }
   };
 
   const handleSignOut = () => {
@@ -80,7 +106,6 @@ const Profile = () => {
     localStorage.removeItem('bmp_currentUser');
     navigate('/login');
   };
-
   const handleExportData = () => {
     const exportData = {
       user,

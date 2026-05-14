@@ -17,8 +17,8 @@ import {
   Save,
   CheckCircle2
 } from 'lucide-react';
-import { updatePreferences } from '../features/preferences/preferencesSlice';
-import { updateBudget } from '../features/budget/budgetSlice';
+import { updatePreferencesLocal } from '../features/preferences/preferencesSlice';
+import { saveBudget } from '../features/budget/budgetSlice';
 import { addNotification } from '../features/notifications/notificationsSlice';
 import './Preferences.css';
 
@@ -74,7 +74,7 @@ const Preferences = () => {
 
   const handleSave = () => {
     // 1. Dispatch preferences update
-    dispatch(updatePreferences({
+    dispatch(updatePreferencesLocal({
       dietToggles,
       selectedAllergies,
       householdSize,
@@ -83,7 +83,7 @@ const Preferences = () => {
     }));
 
     // 2. Update global budget limit
-    dispatch(updateBudget({ total: weeklyBudget }));
+    dispatch(saveBudget({ monthlyLimit: weeklyBudget }));
 
     // 3. Send notification to the header bell
     const activeDiets = Object.entries(dietToggles || {})

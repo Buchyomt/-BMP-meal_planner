@@ -41,7 +41,13 @@ const LandingPage = () => {
 
   useEffect(() => {
     const loggedIn = localStorage.getItem('bmp_isLoggedIn') === 'true';
-    const user = JSON.parse(localStorage.getItem('bmp_currentUser')) || null;
+    let user = null;
+    try {
+      const storedUser = localStorage.getItem('bmp_currentUser');
+      user = storedUser ? JSON.parse(storedUser) : null;
+    } catch (e) {
+      console.warn('Error parsing user from localStorage', e);
+    }
     setIsLoggedIn(loggedIn);
     setCurrentUser(user);
   }, []);

@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { generateRandomPlan } from '../features/mealPlan/mealPlanSlice';
-import { updatePreferences } from '../features/preferences/preferencesSlice';
+import { updatePreferencesLocal } from '../features/preferences/preferencesSlice';
 
 const useAutoScheduler = () => {
   const dispatch = useDispatch();
@@ -22,7 +22,7 @@ const useAutoScheduler = () => {
         if (lastGenerated !== todayStr) {
           console.log(`Auto-generating plan for ${currentDay}...`);
           dispatch(generateRandomPlan({ nutritionalGoal, weeklyBudget, selectedAllergies }));
-          dispatch(updatePreferences({ lastGenerated: todayStr }));
+          dispatch(updatePreferencesLocal({ lastGenerated: todayStr }));
         }
       }
     };

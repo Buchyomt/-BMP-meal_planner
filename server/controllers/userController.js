@@ -1,0 +1,90 @@
+import User from '../models/User.js';
+import UserPreference from '../models/UserPreference.js';
+
+// @desc    Get all users (Admin only)
+// @route   GET /api/user/all
+// @access  Private/Admin
+export const getUsers = async (req, res) => {
+  try {
+    const users = await User.find({}).select('-password');
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Get user preferences
+// @route   GET /api/user/preferences
+// @access  Private
+export const getPreferences = async (req, res) => {
+  try {
+    let preferences = await UserPreference.findOne({ user: req.user._id });
+    
+    if (!preferences) {
+      // Create default preferences if they don't exist
+      preferences = await UserPreference.create({ user: req.user._id });
+    }
+    
+    res.json(preferences);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Update user preferences
+// @route   PUT /api/user/preferences
+// @access  Private
+export const updatePreferences = async (req, res) => {
+  try {
+    const preferences = await UserPreference.findOneAndUpdate(
+      { user: req.user._id },
+      { $set: req.body },
+      { new: true, upsert: true }
+    );
+    
+    res.json(preferences);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Update user profile
+// @route   PUT /api/user/profile
+// @access  Private
+export const updateProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+
+    if (user) {
+      user.name = req.body.name || user.name;
+      
+      // Update email if provided (might need verification in real app)
+      if (req.body.email) {
+        user.email = req.body.email;
+      }
+
+      if (req.body.password) {
+        user.password = req.body.password;
+      }
+
+      if (req.file) {
+        user.profileImage = req.file.path; // Cloudinary returns the URL in path
+      }
+
+      const updatedUser = await user.save();
+
+      res.json({
+        _id: updatedUser._id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        role: updatedUser.role,
+        profileImage: updatedUser.profileImage,
+        token: req.headers.authorization.split(' ')[1] // Keep existing token
+      });
+    } else {
+      res.status(404).json({ message: 'User not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

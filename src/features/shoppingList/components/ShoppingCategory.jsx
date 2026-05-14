@@ -19,9 +19,9 @@ const ShoppingCategory = ({ category }) => {
       <div className="items-list">
         {category.items.map(item => (
           <div 
-            key={item.id} 
+            key={item._id || item.id} 
             className={`shopping-item ${item.checked ? 'checked' : ''}`}
-            onClick={() => dispatch(toggleItem({ categoryId: category.id, itemId: item.id }))}
+            onClick={() => dispatch(toggleItem({ categoryId: category._id || category.id, itemId: item._id || item.id }))}
           >
             <div className="checkbox-container">
               <div className={`checkbox ${item.checked ? 'active' : ''}`}>

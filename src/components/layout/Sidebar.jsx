@@ -7,13 +7,21 @@ import {
   Settings, 
   Boxes,
   TrendingUp,
-  X
+  X,
+  ShieldAlert
 } from 'lucide-react';
 import HelpModal from './HelpModal';
 import './Sidebar.css';
 
 const Sidebar = ({ isOpen, onClose }) => {
   const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
+  
+  let isAdmin = false;
+  try {
+    const storedUser = localStorage.getItem('bmp_currentUser');
+    const user = storedUser ? JSON.parse(storedUser) : null;
+    isAdmin = user && user.role === 'admin';
+  } catch (e) {}
 
   const menuItems = [
     { icon: <LayoutDashboard size={20} />, label: 'Dashboard', path: '/dashboard' },
@@ -23,6 +31,10 @@ const Sidebar = ({ isOpen, onClose }) => {
     { icon: <TrendingUp size={20} />, label: 'Market Prices', path: '/market' },
     { icon: <Settings size={20} />, label: 'Settings', path: '/settings' },
   ];
+
+  if (isAdmin) {
+    menuItems.push({ icon: <ShieldAlert size={20} />, label: 'Admin Panel', path: '/admin' });
+  }
 
   return (
     <aside className={`sidebar ${isOpen ? 'sidebar-open' : ''}`}>

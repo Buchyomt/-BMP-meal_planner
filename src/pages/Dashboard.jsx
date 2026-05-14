@@ -8,7 +8,10 @@ import SavingsChart from '../features/budget/components/SavingsChart';
 import MealsSummaryCard from '../features/mealPlan/components/MealsSummaryCard';
 import QuickActionCard from '../components/ui/QuickActionCard';
 import { ShoppingBag, Settings, Share2, Calendar } from 'lucide-react';
-import { updateSpentFromMeals } from '../features/budget/budgetSlice';
+import { fetchBudget, saveBudget, updateSpentFromMeals } from '../features/budget/budgetSlice';
+import { fetchMealPlans } from '../features/mealPlan/mealPlanSlice';
+import { fetchPreferences } from '../features/preferences/preferencesSlice';
+import { fetchShoppingList } from '../features/shoppingList/shoppingListSlice';
 import './Dashboard.css';
 
 const Dashboard = () => {
@@ -19,12 +22,23 @@ const Dashboard = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const currentUser = JSON.parse(localStorage.getItem('bmp_currentUser'));
-    if (currentUser && currentUser.name) {
-      const firstName = currentUser.name.split(' ')[0];
-      setUserName(firstName);
+    try {
+      const storedUser = localStorage.getItem('bmp_currentUser');
+      const currentUser = storedUser ? JSON.parse(storedUser) : null;
+      if (currentUser && currentUser.name) {
+        const firstName = currentUser.name.split(' ')[0];
+        setUserName(firstName);
+      }
+    } catch (e) {
+      console.warn('Error parsing user in Dashboard', e);
     }
-  }, []);
+    
+    // Fetch user data from backend
+    dispatch(fetchBudget());
+    dispatch(fetchMealPlans());
+    dispatch(fetchPreferences());
+    dispatch(fetchShoppingList());
+  }, [dispatch]);
 
 
   const getCurrentWeekString = () => {
@@ -44,7 +58,7 @@ const Dashboard = () => {
   const remaining = total - spent;
 
   const handleUpdateTotal = (newTotal) => {
-    dispatch(updateBudget({ total: newTotal }));
+    dispatch(saveBudget({ monthlyLimit: newTotal }));
     // Cleanup old legacy key
     localStorage.removeItem('bmp_customTotal');
   };

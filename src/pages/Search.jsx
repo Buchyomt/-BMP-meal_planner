@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { mealPool } from '../features/mealPlan/mealPlanSlice';
+import { searchRecipes, mealPool } from '../features/mealPlan/mealPlanSlice';
 import MealPlanCard from '../features/mealPlan/components/MealPlanCard';
-import { Search as SearchIcon, Filter, ArrowLeft } from 'lucide-react';
+import { Search as SearchIcon, Filter, ArrowLeft, Loader2 } from 'lucide-react';
 import { updateSpentFromMeals } from '../features/budget/budgetSlice';
 import { useSelector } from 'react-redux';
 import './Search.css';
@@ -14,14 +14,22 @@ const Search = () => {
   const { spent } = useSelector((state) => state.budget);
   const [results, setResults] = useState([]);
   const [query, setQuery] = useState('');
+  const [loading, setLoading] = useState(false);
   
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     const q = searchParams.get('q') || '';
     setQuery(q);
     
-    if (q.trim()) {
-      // Flatten all categories from mealPool into a single searchable array
+    const performSearch = async () => {
+      if (!q.trim()) {
+        setResults([]);
+        return;
+      }
+
+      setLoading(true);
+      
+      // 1. Search local pool
       const allMeals = [
         ...mealPool.breakfast,
         ...mealPool.lunch,
@@ -29,24 +37,36 @@ const Search = () => {
         ...mealPool.snack
       ];
       
-      const filtered = allMeals.filter(meal => {
+      const localResults = allMeals.filter(meal => {
         const name = (meal.meal || meal.name || '').toLowerCase();
-        const desc = (meal.description || '').toLowerCase();
         const ingredients = (meal.ingredients || []).join(' ').toLowerCase();
-        const tags = (meal.tags || []).join(' ').toLowerCase();
-        const searchTerm = q.toLowerCase();
-        
-        return name.includes(searchTerm) || 
-               desc.includes(searchTerm) || 
-               ingredients.includes(searchTerm) ||
-               tags.includes(searchTerm);
+        return name.includes(q.toLowerCase()) || ingredients.includes(q.toLowerCase());
       });
-      
-      setResults(filtered);
-    } else {
-      setResults([]);
-    }
-  }, [location.search]);
+
+      // 2. Search Spoonacular via Backend
+      try {
+        const apiAction = await dispatch(searchRecipes(q));
+        const apiResults = apiAction.payload || [];
+        
+        // Combine results, removing duplicates by name
+        const combined = [...localResults];
+        apiResults.forEach(apiMeal => {
+          if (!combined.some(m => m.meal.toLowerCase() === apiMeal.meal.toLowerCase())) {
+            combined.push(apiMeal);
+          }
+        });
+        
+        setResults(combined);
+      } catch (err) {
+        console.error('API Search failed:', err);
+        setResults(localResults); // Fallback to local
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    performSearch();
+  }, [location.search, dispatch]);
 
   const handleToggleMeal = (isAdded, price) => {
     const newSpent = isAdded ? spent + price : spent - price;
@@ -72,7 +92,12 @@ const Search = () => {
         </div>
       </div>
 
-      {results.length > 0 ? (
+      {loading ? (
+        <div className="search-loading">
+          <Loader2 size={48} className="spinner" />
+          <p>Searching for delicious recipes...</p>
+        </div>
+      ) : results.length > 0 ? (
         <div className="search-results-grid">
           {results.map((meal, index) => (
             <MealPlanCard 

@@ -26,10 +26,11 @@ import {
   setCurrency, 
   updateNotificationSettings 
 } from '../features/settings/settingsSlice';
-import { updatePreferences } from '../features/preferences/preferencesSlice';
-import { updateBudget } from '../features/budget/budgetSlice';
+import { savePreferences, updatePreferencesLocal } from '../features/preferences/preferencesSlice';
+import { saveBudget } from '../features/budget/budgetSlice';
 import { addNotification } from '../features/notifications/notificationsSlice';
 import { generateRandomPlan } from '../features/mealPlan/mealPlanSlice';
+import api from '../services/api';
 import './Settings.css';
 
 const ACCENT_PRESETS = [
@@ -78,12 +79,14 @@ const Settings = () => {
 
   // Load user data on mount
   useEffect(() => {
-    const userJson = localStorage.getItem('bmp_currentUser');
-    if (userJson) {
-      try {
+    try {
+      const userJson = localStorage.getItem('bmp_currentUser');
+      if (userJson) {
         const user = JSON.parse(userJson);
         setProfileData(prev => ({ ...prev, ...user }));
-      } catch (e) {}
+      }
+    } catch (e) {
+      console.warn('Error parsing user in Settings', e);
     }
   }, []);
 
@@ -97,32 +100,43 @@ const Settings = () => {
     }
   }, [settings.theme, settings.accentColor]);
 
-  const handleSaveAll = () => {
-    dispatch(updatePreferences({
-      ...preferences,
-      ...prefData,
-    }));
-    dispatch(updateBudget({ total: prefData.weeklyBudget }));
-    localStorage.setItem('bmp_currentUser', JSON.stringify(profileData));
+  const handleSaveAll = async () => {
+    try {
+      // Save Preferences to Backend
+      await dispatch(savePreferences({
+        ...preferences,
+        ...prefData,
+      })).unwrap();
 
-    // Regenerate meal plan to apply any new allergy/diet settings
-    dispatch(generateRandomPlan({ 
-      nutritionalGoal: preferences.nutritionalGoal || 'Balanced', 
-      weeklyBudget: prefData.weeklyBudget, 
-      selectedAllergies: preferences.selectedAllergies || []
-    }));
+      // Save Budget to Backend
+      await dispatch(saveBudget({ monthlyLimit: prefData.weeklyBudget })).unwrap();
 
-    setShowSuccess(true);
-    dispatch(addNotification({
-      title: 'Settings Saved',
-      message: 'Your profile and preferences have been updated.',
-    }));
+      // For profile data, we'll store it locally for now (can be expanded to a User model update API later)
+      localStorage.setItem('bmp_currentUser', JSON.stringify(profileData));
 
-    // Redirect to dashboard after a short delay to show success state
-    setTimeout(() => {
-      setShowSuccess(false);
-      navigate('/dashboard');
-    }, 1500);
+      // Regenerate meal plan to apply any new allergy/diet settings
+      dispatch(generateRandomPlan({ 
+        nutritionalGoal: preferences.nutritionalGoal || 'Balanced', 
+        weeklyBudget: prefData.weeklyBudget, 
+        selectedAllergies: preferences.selectedAllergies || []
+      }));
+
+      setShowSuccess(true);
+      dispatch(addNotification({
+        title: 'Settings Saved',
+        message: 'Your profile and preferences have been updated.',
+      }));
+
+      setTimeout(() => {
+        setShowSuccess(false);
+        navigate('/dashboard');
+      }, 1500);
+    } catch (err) {
+      dispatch(addNotification({
+        title: 'Error Saving Settings',
+        message: err || 'Something went wrong while saving.',
+      }));
+    }
   };
 
   const handleImageChange = (e) => {
@@ -305,7 +319,7 @@ const Settings = () => {
                       <input 
                         type="checkbox" 
                         checked={preferences.dietToggles?.[diet.id] || false}
-                        onChange={(e) => dispatch(updatePreferences({
+                        onChange={(e) => dispatch(updatePreferencesLocal({
                           dietToggles: { ...(preferences.dietToggles || {}), [diet.id]: e.target.checked }
                         }))}
                       />
@@ -342,7 +356,7 @@ const Settings = () => {
                             updated = [...current.filter(a => a !== 'None'), allergy];
                           }
                         }
-                        dispatch(updatePreferences({ selectedAllergies: updated }));
+                        dispatch(updatePreferencesLocal({ selectedAllergies: updated }));
                       }}
                     >
                       {allergy}

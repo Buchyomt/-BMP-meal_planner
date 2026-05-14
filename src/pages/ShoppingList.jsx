@@ -6,13 +6,20 @@ import CostSummary from '../features/shoppingList/components/CostSummary';
 import QuickAdd from '../features/shoppingList/components/QuickAdd';
 import EditPlan from '../features/shoppingList/components/EditPlan';
 import { updateSpentFromMeals } from '../features/budget/budgetSlice';
+import { fetchShoppingList } from '../features/shoppingList/shoppingListSlice';
+import { fetchPantry } from '../features/pantry/pantrySlice';
 import './ShoppingList.css';
 
 const ShoppingList = () => {
   const dispatch = useDispatch();
-  const { categories } = useSelector(state => state.shoppingList);
+  const { categories, loading } = useSelector(state => state.shoppingList);
   const { items: pantryItems } = useSelector(state => state.pantry);
   const [searchTerm, setSearchTerm] = useState('');
+
+  useEffect(() => {
+    dispatch(fetchShoppingList());
+    dispatch(fetchPantry());
+  }, [dispatch]);
 
   // Synchronize Checked Items Total with Global 'Spent' Budget
   useEffect(() => {

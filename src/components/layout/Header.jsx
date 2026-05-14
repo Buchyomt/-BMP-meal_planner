@@ -45,10 +45,16 @@ const Header = ({ onMenuClick }) => {
 
   useEffect(() => {
     const loadUser = () => {
-      const currentUser = JSON.parse(localStorage.getItem('bmp_currentUser'));
-      if (currentUser) {
-        if (currentUser.name) setUserName(currentUser.name);
-        if (currentUser.image) setUserImage(currentUser.image);
+      try {
+        const storedUser = localStorage.getItem('bmp_currentUser');
+        const currentUser = storedUser ? JSON.parse(storedUser) : null;
+        if (currentUser) {
+          if (currentUser.name) setUserName(currentUser.name);
+          if (currentUser.profileImage) setUserImage(currentUser.profileImage);
+          else if (currentUser.image) setUserImage(currentUser.image);
+        }
+      } catch (e) {
+        console.warn('Error parsing user in Header', e);
       }
     };
 

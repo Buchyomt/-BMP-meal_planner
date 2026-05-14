@@ -1,21 +1,73 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import api from '../../services/api';
 import { addNotification } from '../notifications/notificationsSlice';
-import { loadScopedData } from '../../utils/storageUtils';
 
-// ─── Load persisted pantry from localStorage on startup ──────────────────────
-const loadPantry = () => {
-  return loadScopedData('pantry_v1');
-};
+// ─── Async Thunks for API calls ──────────────────────────────────────────────
 
-const defaultItems = [
-  { id: '1', name: 'Rice',     quantity: 5, unit: 'kg',   image: '/assets/pantry/rice.jpg' },
-  { id: '2', name: 'Beans',   quantity: 2, unit: 'kg',   image: '/assets/pantry/beans.jpg' },
-  { id: '3', name: 'Palm Oil',quantity: 1, unit: 'L',    image: '/assets/pantry/palmoil.jpg' },
-  { id: '4', name: 'Salt',    quantity: 1, unit: 'pack', image: 'https://images.unsplash.com/photo-1518110925495-5fe2fda0442c?w=200&auto=format&fit=crop' },
-];
+export const fetchPantry = createAsyncThunk(
+  'pantry/fetchPantry',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await api.get('/pantry');
+      return response.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message || 'Failed to fetch pantry');
+    }
+  }
+);
+
+export const addPantryItem = createAsyncThunk(
+  'pantry/addPantryItem',
+  async (itemData, { dispatch, rejectWithValue }) => {
+    try {
+      const response = await api.post('/pantry', itemData);
+      dispatch(addNotification({
+        title: '📦 Pantry Updated',
+        message: `"${itemData.name}" has been added to your pantry.`,
+        time: 'Just now',
+        link: '/pantry',
+      }));
+      return response.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message || 'Failed to add item');
+    }
+  }
+);
+
+export const updatePantryItem = createAsyncThunk(
+  'pantry/updatePantryItem',
+  async ({ id, ...data }, { rejectWithValue }) => {
+    try {
+      const response = await api.put(`/pantry/${id}`, data);
+      return response.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message || 'Failed to update item');
+    }
+  }
+);
+
+export const deletePantryItem = createAsyncThunk(
+  'pantry/deletePantryItem',
+  async ({ id, name }, { dispatch, rejectWithValue }) => {
+    try {
+      await api.delete(`/pantry/${id}`);
+      dispatch(addNotification({
+        title: '🗑️ Item Removed',
+        message: `"${name}" has been removed from your pantry.`,
+        time: 'Just now',
+        link: '/pantry',
+      }));
+      return id;
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message || 'Failed to remove item');
+    }
+  }
+);
 
 const defaultInitialState = {
-  items: defaultItems,
+  items: [],
+  loading: false,
+  error: null,
   inventoryThresholds: {
     Rice: 2,
     Beans: 1,
@@ -23,32 +75,10 @@ const defaultInitialState = {
   },
 };
 
-const initialState = loadPantry() || defaultInitialState;
-
 const pantrySlice = createSlice({
   name: 'pantry',
-  initialState,
+  initialState: defaultInitialState,
   reducers: {
-    rehydrate: (state, action) => {
-      const persisted = loadPantry();
-      return persisted ? { ...state, ...persisted } : defaultInitialState;
-    },
-    addItem: (state, action) => {
-      state.items.push(action.payload);
-    },
-    updateQuantity: (state, action) => {
-      const { id, quantity } = action.payload;
-      const item = state.items.find((i) => i.id === id);
-      if (item) item.quantity = quantity;
-    },
-    updateItemImage: (state, action) => {
-      const { id, image } = action.payload;
-      const item = state.items.find((i) => i.id === id);
-      if (item) item.image = image;
-    },
-    removeItem: (state, action) => {
-      state.items = state.items.filter((i) => i.id !== action.payload);
-    },
     consumeIngredients: (state, action) => {
       const ingredientsToConsume = action.payload;
       ingredientsToConsume.forEach(({ name, quantity }) => {
@@ -57,37 +87,47 @@ const pantrySlice = createSlice({
       });
     },
   },
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchPantry.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(fetchPantry.fulfilled, (state, action) => {
+        state.loading = false;
+        state.items = action.payload;
+      })
+      .addCase(fetchPantry.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(addPantryItem.fulfilled, (state, action) => {
+        state.items.push(action.payload);
+      })
+      .addCase(updatePantryItem.fulfilled, (state, action) => {
+        const index = state.items.findIndex(item => item._id === action.payload._id);
+        if (index !== -1) state.items[index] = action.payload;
+      })
+      .addCase(deletePantryItem.fulfilled, (state, action) => {
+        state.items = state.items.filter(item => item._id !== action.payload);
+      });
+  }
 });
 
-export const { addItem, updateQuantity, updateItemImage, removeItem, consumeIngredients } = pantrySlice.actions;
+export const { consumeIngredients } = pantrySlice.actions;
 
-// ─── Thunk: Add item AND post a notification ──────────────────────────────────
+export const updateQuantity = ({ id, quantity }) => (dispatch) => {
+  dispatch(updatePantryItem({ id, quantity }));
+};
+
+// ─── Legacy compatibility thunks (mapping to new API thunks) ──────────────────
 export const addPantryItemWithNotification = (item) => (dispatch) => {
-  dispatch(addItem(item));
-  dispatch(
-    addNotification({
-      title: '📦 Pantry Updated',
-      message: `"${item.name}" (${item.quantity} ${item.unit}) has been added to your pantry.`,
-      time: 'Just now',
-      link: '/pantry',
-    })
-  );
+  dispatch(addPantryItem(item));
 };
 
-// ─── Thunk: Remove item AND post a notification ───────────────────────────────
 export const removePantryItemWithNotification = (id, name) => (dispatch) => {
-  dispatch(removeItem(id));
-  dispatch(
-    addNotification({
-      title: '🗑️ Item Removed',
-      message: `"${name}" has been removed from your pantry.`,
-      time: 'Just now',
-      link: '/pantry',
-    })
-  );
+  dispatch(deletePantryItem({ id, name }));
 };
 
-// ─── Thunk: Alert when item goes low stock ────────────────────────────────────
 export const alertLowStock = (name) => (dispatch) => {
   dispatch(
     addNotification({
@@ -97,6 +137,10 @@ export const alertLowStock = (name) => (dispatch) => {
       link: '/pantry',
     })
   );
+};
+
+export const updateItemImage = ({ id, image }) => (dispatch) => {
+  dispatch(updatePantryItem({ id, image }));
 };
 
 export default pantrySlice.reducer;

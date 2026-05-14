@@ -1,29 +1,96 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { GoogleLogin } from '@react-oauth/google';
+import api from '../services/api';
 import '../styles/Auth.css';
 
 const Login = () => {
   const navigate = useNavigate();
+  const [loginMode, setLoginMode] = useState('password'); // 'password' or 'otp'
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpCode, setOtpCode] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = (e) => {
+  const handleSendOTP = async () => {
+    if (!email) {
+      setError('Please enter your email to receive an OTP.');
+      return;
+    }
+    setLoading(true);
+    try {
+      await api.post('/auth/send-otp', { email });
+      setOtpSent(true);
+      setError('');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to send OTP.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyOTP = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    try {
+      const response = await api.post('/auth/verify-otp', { email, code: otpCode });
+      const { token, name, email: userEmail, role } = response.data;
+      localStorage.setItem('bmp_token', token);
+      localStorage.setItem('bmp_isLoggedIn', 'true');
+      localStorage.setItem('bmp_currentUser', JSON.stringify({ name, email: userEmail, role }));
+      window.location.href = '/dashboard';
+    } catch (err) {
+      setError(err.response?.data?.message || 'Invalid or expired OTP.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    setLoading(true);
+    try {
+      const response = await api.post('/auth/google', {
+        token: credentialResponse.credential
+      });
+      const { token, name, email: userEmail, role } = response.data;
+      localStorage.setItem('bmp_token', token);
+      localStorage.setItem('bmp_isLoggedIn', 'true');
+      localStorage.setItem('bmp_currentUser', JSON.stringify({ name, email: userEmail, role }));
+      window.location.href = '/dashboard';
+    } catch (err) {
+      setError(err.response?.data?.message || 'Google Sign-In failed.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setError('');
+
     if (!email || !password) {
       setError('Please enter both email and password.');
       return;
     }
 
-    const users = JSON.parse(localStorage.getItem('bmp_users')) || [];
-    const user = users.find(u => u.email === email && u.password === password);
+    setLoading(true);
+    try {
+      const response = await api.post('/auth/login', { email, password });
+      const { token, name, email: userEmail, role } = response.data;
 
-    if (user) {
+      // Store auth data
+      localStorage.setItem('bmp_token', token);
       localStorage.setItem('bmp_isLoggedIn', 'true');
-      localStorage.setItem('bmp_currentUser', JSON.stringify({ name: user.name, email: user.email }));
+      localStorage.setItem('bmp_currentUser', JSON.stringify({ name, email: userEmail, role }));
+
+      // Redirect to dashboard
       window.location.href = '/dashboard';
-    } else {
-      setError('Invalid email or password.');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Invalid email or password.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -38,7 +105,7 @@ const Login = () => {
 
           {error && <div className="error-message">{error}</div>}
           
-          <form onSubmit={handleLogin} className="auth-form">
+          <form onSubmit={loginMode === 'password' ? handleLogin : handleVerifyOTP} className="auth-form">
             <div className="form-group">
               <label>Email Address</label>
               <input 
@@ -50,26 +117,77 @@ const Login = () => {
               />
             </div>
             
-            <div className="form-group">
-              <label>Password</label>
-              <input 
-                type="password" 
-                placeholder="••••••••" 
-                value={password} 
-                onChange={e => setPassword(e.target.value)} 
-                required 
-              />
-            </div>
+            {loginMode === 'password' ? (
+              <>
+                <div className="form-group">
+                  <label>Password</label>
+                  <input 
+                    type="password" 
+                    placeholder="••••••••" 
+                    value={password} 
+                    onChange={e => setPassword(e.target.value)} 
+                    required 
+                  />
+                </div>
 
-            <div className="auth-extras">
-              <label className="remember-me">
-                <input type="checkbox" /> Remember me
-              </label>
-              <Link to="#" className="forgot-password">Forgot password?</Link>
-            </div>
-            
-            <button type="submit" className="auth-button">Log In</button>
+                <div className="auth-extras">
+                  <label className="remember-me">
+                    <input type="checkbox" /> Remember me
+                  </label>
+                  <button type="button" onClick={() => setLoginMode('otp')} className="text-btn">Login with OTP instead</button>
+                </div>
+                
+                <button type="submit" className="auth-button" disabled={loading}>
+                  {loading ? 'Logging In...' : 'Log In'}
+                </button>
+              </>
+            ) : (
+              <>
+                {otpSent ? (
+                  <div className="form-group">
+                    <label>Enter 6-Digit OTP</label>
+                    <input 
+                      type="text" 
+                      placeholder="000000" 
+                      value={otpCode} 
+                      onChange={e => setOtpCode(e.target.value)} 
+                      maxLength={6}
+                      required 
+                    />
+                    <p className="otp-hint">Sent to {email}</p>
+                  </div>
+                ) : null}
+
+                <div className="auth-extras">
+                  <button type="button" onClick={() => setLoginMode('password')} className="text-btn">Back to Password</button>
+                </div>
+                
+                {!otpSent ? (
+                  <button type="button" onClick={handleSendOTP} className="auth-button" disabled={loading}>
+                    {loading ? 'Sending...' : 'Send OTP to Email'}
+                  </button>
+                ) : (
+                  <button type="submit" className="auth-button" disabled={loading}>
+                    {loading ? 'Verifying...' : 'Verify & Login'}
+                  </button>
+                )}
+              </>
+            )}
           </form>
+
+          <div className="auth-divider">
+            <span>OR</span>
+          </div>
+
+          <div className="google-auth-container">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={() => setError('Google Sign-In was unsuccessful. Try again later.')}
+              theme="outline"
+              size="large"
+              width="100%"
+            />
+          </div>
           
           <div className="auth-footer">
             Don't have an account? <Link to="/signup">Sign up for free</Link>

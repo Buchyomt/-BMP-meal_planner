@@ -1,8 +1,10 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Plus, Minus, Search, Trash2, Boxes, AlertTriangle, CheckCircle, ImagePlus, Camera } from 'lucide-react';
 import {
+  fetchPantry,
   updateQuantity,
+  updatePantryItem,
   updateItemImage,
   addPantryItemWithNotification,
   removePantryItemWithNotification,
@@ -38,6 +40,10 @@ const Pantry = () => {
   const dispatch   = useDispatch();
   const { items }  = useSelector((state) => state.pantry);
   const isOnline   = useOnlineStatus();
+
+  useEffect(() => {
+    dispatch(fetchPantry());
+  }, [dispatch]);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [newItem,    setNewItem]    = useState({ name: '', quantity: '', unit: 'kg', image: '' });
@@ -82,7 +88,6 @@ const Pantry = () => {
     if (!newItem.name.trim() || !newItem.quantity) return;
 
     const item = {
-      id:       Date.now().toString(),
       name:     newItem.name.trim(),
       quantity: parseFloat(newItem.quantity),
       unit:     newItem.unit,
@@ -90,23 +95,22 @@ const Pantry = () => {
     };
 
     dispatch(addPantryItemWithNotification(item));
-    setAddedFlash(item.id);
-    setTimeout(() => setAddedFlash(null), 2000);
+    // The notification will handle the visual feedback
     setNewItem({ name: '', quantity: '', unit: 'kg', image: '' });
     setImagePreview('');
     setIsAdding(false);
   };
 
   const adjustQuantity = (item, delta) => {
-    const newQty = Math.max(0, item.quantity + delta);
-    dispatch(updateQuantity({ id: item.id, quantity: newQty }));
+    const newQty = Math.max(0, (parseFloat(item.quantity) || 0) + delta);
+    dispatch(updatePantryItem({ id: item._id, quantity: newQty }));
     if (newQty <= LOW_STOCK_THRESHOLD && newQty < item.quantity) {
       dispatch(alertLowStock(item.name));
     }
   };
 
   const handleRemove = (item) => {
-    dispatch(removePantryItemWithNotification(item.id, item.name));
+    dispatch(removePantryItemWithNotification(item._id, item.name));
   };
 
   return (
@@ -221,11 +225,11 @@ const Pantry = () => {
       ) : (
         <div className="pantry-grid">
           {filteredItems.map(item => {
-            const isLow    = item.quantity <= LOW_STOCK_THRESHOLD;
-            const justAdded = addedFlash === item.id;
+            const isLow    = (parseFloat(item.quantity) || 0) <= LOW_STOCK_THRESHOLD;
+            const justAdded = addedFlash === item._id;
             return (
               <div
-                key={item.id}
+                key={item._id}
                 className={`pantry-card glass-card ${isLow ? 'low-stock' : ''} ${justAdded ? 'just-added' : ''}`}
               >
                 {/* Card Image */}
@@ -249,16 +253,16 @@ const Pantry = () => {
                   <button
                     className="edit-img-btn"
                     title="Change image"
-                    onClick={() => editFileRefs.current[item.id]?.click()}
+                    onClick={() => editFileRefs.current[item._id]?.click()}
                   >
                     <Camera size={14} />
                   </button>
                   <input
-                    ref={(el) => (editFileRefs.current[item.id] = el)}
+                    ref={(el) => (editFileRefs.current[item._id] = el)}
                     type="file"
                     accept="image/*"
                     style={{ display: 'none' }}
-                    onChange={(e) => handleEditImage(item.id, e)}
+                    onChange={(e) => handleEditImage(item._id, e)}
                   />
 
                   {isLow && <span className="pantry-low-badge">⚠️ Low</span>}

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import api from '../services/api';
 import '../styles/Auth.css';
 
 const Signup = () => {
@@ -8,25 +9,27 @@ const Signup = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSignup = (e) => {
+  const handleSignup = async (e) => {
     e.preventDefault();
+    setError('');
+
     if (!name || !email || !password) {
       setError('All fields are required.');
       return;
     }
 
-    const users = JSON.parse(localStorage.getItem('bmp_users')) || [];
-
-    if (users.some(user => user.email === email)) {
-      setError('An account with this email already exists.');
-      return;
+    setLoading(true);
+    try {
+      await api.post('/auth/signup', { name, email, password });
+      // Redirect to login after successful signup
+      navigate('/login');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Something went wrong during signup.');
+    } finally {
+      setLoading(false);
     }
-
-    users.push({ name, email, password });
-    localStorage.setItem('bmp_users', JSON.stringify(users));
-
-    navigate('/login');
   };
 
   return (
@@ -78,7 +81,9 @@ const Signup = () => {
               By signing up, you agree to our <Link to="#">Terms</Link> and <Link to="#">Privacy Policy</Link>.
             </p>
 
-            <button type="submit" className="auth-button">Sign Up</button>
+            <button type="submit" className="auth-button" disabled={loading}>
+              {loading ? 'Signing Up...' : 'Sign Up'}
+            </button>
           </form>
           
           <div className="auth-footer">

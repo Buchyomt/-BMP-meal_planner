@@ -1,10 +1,31 @@
-import { createSlice } from '@reduxjs/toolkit';
-import { loadScopedData } from '../../utils/storageUtils';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import api from '../../services/api';
 
-// ─── Load persisted preferences from localStorage on startup ─────────────────
-const loadPreferences = () => {
-  return loadScopedData('preferences_v1');
-};
+// ─── Async Thunks for API calls ──────────────────────────────────────────────
+
+export const fetchPreferences = createAsyncThunk(
+  'preferences/fetchPreferences',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await api.get('/user/preferences');
+      return response.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message || 'Failed to fetch preferences');
+    }
+  }
+);
+
+export const savePreferences = createAsyncThunk(
+  'preferences/savePreferences',
+  async (prefData, { rejectWithValue }) => {
+    try {
+      const response = await api.put('/user/preferences', prefData);
+      return response.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message || 'Failed to save preferences');
+    }
+  }
+);
 
 const defaultInitialState = {
   dietToggles: {
@@ -19,35 +40,39 @@ const defaultInitialState = {
   householdSize: 4,
   planDuration: 'Weekly',
   weeklyBudget: 15000,
-  nutritionalGoal: 'Balanced', // New: Weight Loss, Muscle Gain, Balanced
-  autoSchedule: 'Monday', // New: Sunday, Monday, etc. or None
+  nutritionalGoal: 'Balanced', 
+  autoSchedule: 'Monday', 
   lastGenerated: null,
+  loading: false,
+  error: null
 };
-
-const initialState = loadPreferences() || defaultInitialState;
 
 const preferencesSlice = createSlice({
   name: 'preferences',
-  initialState,
+  initialState: defaultInitialState,
   reducers: {
-    rehydrate: (state, action) => {
-      const persisted = loadPreferences();
-      return persisted ? { ...state, ...persisted } : defaultInitialState;
-    },
-    updatePreferences: (state, action) => {
+    updatePreferencesLocal: (state, action) => {
       return { ...state, ...action.payload };
     },
-    setNutritionalGoal: (state, action) => {
-      state.nutritionalGoal = action.payload;
-    },
-    setAllergy: (state, action) => {
-      state.selectedAllergies = action.payload;
-    },
-    setDiet: (state, action) => {
-      state.dietToggles = action.payload;
-    }
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchPreferences.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(fetchPreferences.fulfilled, (state, action) => {
+        state.loading = false;
+        return { ...state, ...action.payload, loading: false };
+      })
+      .addCase(fetchPreferences.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(savePreferences.fulfilled, (state, action) => {
+        return { ...state, ...action.payload };
+      });
   }
 });
 
-export const { updatePreferences, setNutritionalGoal, setAllergy, setDiet } = preferencesSlice.actions;
+export const { updatePreferencesLocal } = preferencesSlice.actions;
 export default preferencesSlice.reducer;

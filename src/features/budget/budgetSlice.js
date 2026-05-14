@@ -1,16 +1,39 @@
-import { createSlice } from '@reduxjs/toolkit';
-import { loadScopedData } from '../../utils/storageUtils';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import api from '../../services/api';
 
-// ─── Load persisted budget from localStorage on startup ──────────────────────
-const loadBudget = () => {
-  return loadScopedData('budget_v1');
-};
+// ─── Async Thunks for API calls ──────────────────────────────────────────────
+
+export const fetchBudget = createAsyncThunk(
+  'budget/fetchBudget',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await api.get('/budget');
+      return response.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message || 'Failed to fetch budget');
+    }
+  }
+);
+
+export const saveBudget = createAsyncThunk(
+  'budget/saveBudget',
+  async (budgetData, { rejectWithValue }) => {
+    try {
+      const response = await api.put('/budget', budgetData);
+      return response.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message || 'Failed to update budget');
+    }
+  }
+);
 
 const defaultInitialState = {
   total: 20000,
   spent: 14550,
   remaining: 5450,
   savings: 5200,
+  loading: false,
+  error: null,
   weeklyHistory: [
     { day: 'Mon', savings: 1200 },
     { day: 'Tue', savings: 800 },
@@ -21,38 +44,50 @@ const defaultInitialState = {
   ]
 };
 
-const initialState = loadBudget() || defaultInitialState;
-
 const budgetSlice = createSlice({
   name: 'budget',
-  initialState,
+  initialState: defaultInitialState,
   reducers: {
-    updateBudget: (state, action) => {
+    updateBudgetLocal: (state, action) => {
       return { ...state, ...action.payload };
     },
-    rehydrate: (state, action) => {
-      const persisted = loadBudget();
-      return persisted ? { ...state, ...persisted } : defaultInitialState;
-    },
-    updateSpentFromMeals: (state, action) => {
-      const mealTotal = action.payload;
-      state.spent = mealTotal;
-      state.remaining = state.total - state.spent;
-      state.savings = Math.max(0, state.total * 0.3 - (state.spent * 0.2)); // Dynamic mock savings
-      
-      // Dynamically update the weekly history chart data based on new savings
-      const baseSavings = state.savings / 6; 
-      state.weeklyHistory = [
-        { day: 'Mon', savings: Math.round(baseSavings * 1.2) },
-        { day: 'Tue', savings: Math.round(baseSavings * 0.8) },
-        { day: 'Wed', savings: Math.round(baseSavings * 1.5) },
-        { day: 'Thu', savings: Math.round(baseSavings * 1.0) },
-        { day: 'Fri', savings: Math.round(baseSavings * 0.5) },
-        { day: 'Sat', savings: Math.round(baseSavings * 1.0) },
-      ];
-    },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchBudget.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(fetchBudget.fulfilled, (state, action) => {
+        state.loading = false;
+        // Map backend fields to frontend state
+        if (action.payload) {
+          state.total = action.payload.monthlyLimit || state.total;
+          state.spent = action.payload.spent !== undefined ? action.payload.spent : state.spent;
+          state.remaining = state.total - state.spent;
+        }
+      })
+      .addCase(fetchBudget.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(saveBudget.fulfilled, (state, action) => {
+        if (action.payload) {
+          state.total = action.payload.monthlyLimit || state.total;
+          state.spent = action.payload.spent !== undefined ? action.payload.spent : state.spent;
+          state.remaining = state.total - state.spent;
+        }
+      });
   },
 });
 
-export const { updateBudget, updateSpentFromMeals, rehydrate } = budgetSlice.actions;
+export const { updateBudgetLocal } = budgetSlice.actions;
+
+export const updateSpentFromMeals = (mealTotal) => (dispatch, getState) => {
+  const { budget } = getState();
+  const spent = mealTotal;
+  const remaining = budget.total - spent;
+  
+  dispatch(saveBudget({ spent }));
+};
+
 export default budgetSlice.reducer;

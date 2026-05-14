@@ -1,13 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { loadScopedData } from '../../utils/storageUtils';
-
-// ─── Load persisted notifications from localStorage on startup ────────────────
-const loadNotifications = () => {
-  return loadScopedData('notifications_v1');
-};
 
 const defaultInitialState = { items: [] };
-const initialState = loadNotifications() || defaultInitialState;
+const initialState = defaultInitialState;
 
 const notificationsSlice = createSlice({
   name: 'notifications',
