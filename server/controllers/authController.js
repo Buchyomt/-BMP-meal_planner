@@ -28,6 +28,7 @@ export const signup = async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        image: user.profileImage,
         token: generateToken(user._id)
       });
     } else {
@@ -54,6 +55,7 @@ export const login = async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        image: user.profileImage,
         token: generateToken(user._id)
       });
     } else {
@@ -91,6 +93,7 @@ export const googleLogin = async (req, res) => {
         name,
         email,
         password: Math.random().toString(36).slice(-8), // Dummy password
+        profileImage: picture || '',
         role: 'user'
       });
     }
@@ -100,6 +103,7 @@ export const googleLogin = async (req, res) => {
       name: user.name,
       email: user.email,
       role: user.role,
+      image: user.profileImage,
       token: generateToken(user._id)
     });
   } catch (error) {
@@ -194,6 +198,7 @@ export const verifyOTP = async (req, res) => {
       name: user.name,
       email: user.email,
       role: user.role,
+      image: user.profileImage,
       token: generateToken(user._id)
     });
   } catch (error) {

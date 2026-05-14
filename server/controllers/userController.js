@@ -67,6 +67,9 @@ export const updateProfile = async (req, res) => {
         user.password = req.body.password;
       }
 
+      if (req.body.phone !== undefined) user.phone = req.body.phone;
+      if (req.body.location !== undefined) user.location = req.body.location;
+
       if (req.file) {
         user.profileImage = req.file.path; // Cloudinary returns the URL in path
       }
@@ -77,8 +80,10 @@ export const updateProfile = async (req, res) => {
         _id: updatedUser._id,
         name: updatedUser.name,
         email: updatedUser.email,
+        phone: updatedUser.phone,
+        location: updatedUser.location,
         role: updatedUser.role,
-        profileImage: updatedUser.profileImage,
+        image: updatedUser.profileImage,
         token: req.headers.authorization.split(' ')[1] // Keep existing token
       });
     } else {
