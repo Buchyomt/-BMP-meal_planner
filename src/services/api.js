@@ -1,6 +1,9 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api' : 'http://localhost:5000/api');
+// Ensure we use the live backend when hosted on Vercel, regardless of env vars
+const isLive = typeof window !== 'undefined' && window.location.hostname.includes('vercel.app');
+const API_URL = isLive ? '/api' : (import.meta.env.VITE_API_URL || 'http://localhost:5000/api');
+
 
 const api = axios.create({
   baseURL: API_URL,
