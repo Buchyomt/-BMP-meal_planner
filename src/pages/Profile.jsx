@@ -86,14 +86,17 @@ const Profile = () => {
 
       const response = await api.put('/user/profile', formPayload, {
         headers: {
-          'Content-Type': undefined
+          'Content-Type': 'multipart/form-data'
         }
       });
 
-      
       const updatedUser = response.data;
-      localStorage.setItem('bmp_currentUser', JSON.stringify(updatedUser));
-      setUser(prev => ({ ...prev, ...updatedUser }));
+      // Important: Merge the new data with existing data in case some fields are missing in response
+      const existingUser = JSON.parse(localStorage.getItem('bmp_currentUser') || '{}');
+      const mergedUser = { ...existingUser, ...updatedUser };
+      
+      localStorage.setItem('bmp_currentUser', JSON.stringify(mergedUser));
+      setUser(mergedUser);
       setIsEditModalOpen(false);
       showSuccess('Profile updated successfully!');
     } catch (error) {
