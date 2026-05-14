@@ -74,17 +74,19 @@ const Profile = () => {
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     try {
-      const formPayload = new FormData();
-      formPayload.append('name', formData.name);
-      formPayload.append('email', formData.email);
-      formPayload.append('phone', formData.phone || '');
-      formPayload.append('location', formData.location || '');
+      const payload = {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone || '',
+        location: formData.location || ''
+      };
       
-      if (selectedFile) {
-        formPayload.append('profileImage', selectedFile);
+      // Send the Base64 string instead of a File object
+      if (selectedFile && formData.image) {
+        payload.profileImageBase64 = formData.image;
       }
 
-      const response = await api.put('/user/profile', formPayload);
+      const response = await api.put('/user/profile', payload);
 
       const updatedUser = response.data;
       // Important: Merge the new data with existing data in case some fields are missing in response

@@ -12,6 +12,6 @@ router.route('/preferences')
   .get(protect, getPreferences)
   .put(protect, updatePreferences);
 
-router.put('/profile', protect, upload.single('profileImage'), updateProfile);
+router.put('/profile', protect, updateProfile);
 
 export default router;

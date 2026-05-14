@@ -48,6 +48,8 @@ export const updatePreferences = async (req, res) => {
   }
 };
 
+import { cloudinary } from '../config/cloudinary.js';
+
 // @desc    Update user profile
 // @route   PUT /api/user/profile
 // @access  Private
@@ -70,8 +72,17 @@ export const updateProfile = async (req, res) => {
       if (req.body.phone !== undefined) user.phone = req.body.phone;
       if (req.body.location !== undefined) user.location = req.body.location;
 
-      if (req.file) {
-        user.profileImage = req.file.path; // Cloudinary returns the URL in path
+      if (req.body.profileImageBase64) {
+        try {
+          const uploadResponse = await cloudinary.uploader.upload(req.body.profileImageBase64, {
+            folder: 'budget_planner_profiles',
+            transformation: [{ width: 500, height: 500, crop: 'limit' }]
+          });
+          user.profileImage = uploadResponse.secure_url;
+        } catch (uploadError) {
+          console.error('Cloudinary upload error:', uploadError);
+          return res.status(500).json({ message: 'Failed to upload image to Cloudinary' });
+        }
       }
 
       const updatedUser = await user.save();
