@@ -72,7 +72,9 @@ export const updateProfile = async (req, res) => {
       if (req.body.phone !== undefined) user.phone = req.body.phone;
       if (req.body.location !== undefined) user.location = req.body.location;
 
+      console.log("UPDATE PROFILE - Received body keys:", Object.keys(req.body));
       if (req.body.profileImageBase64) {
+        console.log("UPDATE PROFILE - Found profileImageBase64!");
         try {
           const uploadResponse = await cloudinary.uploader.upload(req.body.profileImageBase64, {
             folder: 'budget_planner_profiles',
