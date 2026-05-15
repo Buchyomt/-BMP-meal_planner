@@ -35,6 +35,7 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
     try {
+      const response = await api.post('/auth/verify-otp', { email, code: otpCode });
       const { token, ...userData } = response.data;
       localStorage.setItem('bmp_token', token);
       localStorage.setItem('bmp_isLoggedIn', 'true');
