@@ -30,8 +30,8 @@ app.use(async (req, res, next) => {
       res.status(500).json({ message: 'Database connection failed' });
     }
   } else {
-    console.warn('WARNING: MONGODB_URI not found in .env. Database connection skipped.');
-    next();
+    console.error('CRITICAL ERROR: MONGODB_URI is completely missing from Vercel Environment Variables!');
+    return res.status(500).json({ message: 'Vercel is missing MONGODB_URI. Please add it in Vercel Settings -> Environment Variables.' });
   }
 });
 
