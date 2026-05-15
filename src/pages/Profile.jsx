@@ -86,7 +86,11 @@ const Profile = () => {
         payload.profileImageBase64 = formData.image;
       }
 
-      const response = await api.put('/user/profile', payload);
+      const response = await api.put('/user/profile', payload, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
 
       const updatedUser = response.data;
       // Important: Merge the new data with existing data in case some fields are missing in response
