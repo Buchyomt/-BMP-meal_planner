@@ -8,13 +8,6 @@ import connectDB from './config/db.js';
 // Load env vars
 dotenv.config();
 
-// Connect to database
-if (process.env.MONGODB_URI) {
-  connectDB();
-} else {
-  console.warn('WARNING: MONGODB_URI not found in .env. Database connection skipped.');
-}
-
 // Routes
 import authRoutes from './routes/authRoutes.js';
 import userRoutes from './routes/userRoutes.js';
@@ -25,6 +18,22 @@ import recipeRoutes from './routes/recipeRoutes.js';
 import shoppingListRoutes from './routes/shoppingListRoutes.js';
 
 export const app = express();
+
+// Ensure database connection for serverless environments
+app.use(async (req, res, next) => {
+  if (process.env.MONGODB_URI) {
+    try {
+      await connectDB();
+      next();
+    } catch (error) {
+      console.error('Database connection failed:', error);
+      res.status(500).json({ message: 'Database connection failed' });
+    }
+  } else {
+    console.warn('WARNING: MONGODB_URI not found in .env. Database connection skipped.');
+    next();
+  }
+});
 
 // Body parser
 app.use(express.json({ limit: '50mb' }));
