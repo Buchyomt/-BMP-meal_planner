@@ -29,6 +29,8 @@ export const signup = async (req, res) => {
         email: user.email,
         role: user.role,
         image: user.profileImage,
+        phone: user.phone,
+        location: user.location,
         token: generateToken(user._id)
       });
     } else {
@@ -56,6 +58,8 @@ export const login = async (req, res) => {
         email: user.email,
         role: user.role,
         image: user.profileImage,
+        phone: user.phone,
+        location: user.location,
         token: generateToken(user._id)
       });
     } else {
@@ -104,6 +108,8 @@ export const googleLogin = async (req, res) => {
       email: user.email,
       role: user.role,
       image: user.profileImage,
+      phone: user.phone,
+      location: user.location,
       token: generateToken(user._id)
     });
   } catch (error) {
@@ -199,6 +205,8 @@ export const verifyOTP = async (req, res) => {
       email: user.email,
       role: user.role,
       image: user.profileImage,
+      phone: user.phone,
+      location: user.location,
       token: generateToken(user._id)
     });
   } catch (error) {
