@@ -35,23 +35,9 @@ app.use(async (req, res, next) => {
   }
 });
 
-// Body parser - only use Express parser locally. Vercel handles this natively.
-if (!process.env.VERCEL) {
-  app.use(express.json({ limit: '50mb' }));
-  app.use(express.urlencoded({ limit: '50mb', extended: true }));
-} else {
-  // On Vercel, the body is already parsed by the Vercel bridge.
-  // We just need to ensure it's accessible.
-  app.use((req, res, next) => {
-    // If Vercel parsed it as a string (rare but happens), parse it here
-    if (typeof req.body === 'string' && req.body.length > 0) {
-      try {
-        req.body = JSON.parse(req.body);
-      } catch (e) {}
-    }
-    next();
-  });
-}
+// Body parser
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Enable CORS
 app.use(cors());
