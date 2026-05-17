@@ -165,9 +165,14 @@ const Login = () => {
                     {loading ? 'Sending...' : 'Send OTP to Email'}
                   </button>
                 ) : (
-                  <button type="submit" className="auth-button" disabled={loading}>
-                    {loading ? 'Verifying...' : 'Verify & Login'}
-                  </button>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <button type="submit" className="auth-button" disabled={loading}>
+                      {loading ? 'Verifying...' : 'Verify & Login'}
+                    </button>
+                    <button type="button" onClick={handleSendOTP} className="auth-button secondary" disabled={loading} style={{ backgroundColor: 'transparent', color: '#007A33', border: '1px solid #007A33' }}>
+                      Resend OTP
+                    </button>
+                  </div>
                 )}
               </>
             )}
